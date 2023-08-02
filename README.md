@@ -1,6 +1,17 @@
-# CAFE management
+# CAFE Management
 
-## 
+## Project information
+- Back-End 
+  - Django Framework
+- API 
+  - Django REST framework
+  - axios
+- Database 
+  - unknown
+- Front-End
+  - VueJs
+  - Bootstrap 5
+
 
 ## Entity Relations Diagram (ERD) designed with BARD
 ``` diagram
