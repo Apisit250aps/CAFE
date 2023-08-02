@@ -4,13 +4,13 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 EMP_POSITION = (
-    ("Manager"),
-    ("Assistant Manager"),
-    ("Barista"),
-    ("Cashier"),
-    ("Server"),
-    ("Baker"),
-    ("Delivery Driver"),
+    ("Manager","Manager",),
+    ("Assistant Manager","Assistant Manager"),
+    ("Barista","Barista"),
+    ("Cashier","Cashier"),
+    ("Server","Server"),
+    ("Baker","Baker"),
+    ("Delivery Driver","Delivery Driver"),
     
 )
 
@@ -72,7 +72,7 @@ class Employee(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=256)
     desc = models.TextField()
-    price = models.DecimalField()
+    price = models.DecimalField(max_digits=3, decimal_places=2)
     
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     stock_level = models.IntegerField()
@@ -85,7 +85,7 @@ class Order(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    price = models.DecimalField()
+    price = models.DecimalField(max_digits=3, decimal_places=2)
     
     order_status = models.IntegerField(choices=ORDER_STATUS)
     order_date = models.DateTimeField(auto_now_add=True)
@@ -99,7 +99,7 @@ class Payment(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     
     payment_method = models.IntegerField(choices=PAYMENT)
-    amount = models.DecimalField()
+    amount = models.DecimalField(max_digits=3, decimal_places=2)
     
     def __str__(self):
         return f"{self.order} {self.amount}"
@@ -108,7 +108,7 @@ class Ingredient(models.Model):
     
     name = models.CharField(max_length=256)
     desc = models.TextField()
-    cost = models.DecimalField()
+    cost = models.DecimalField(max_digits=3, decimal_places=2)
     
     def __str__(self):
         return self.name
