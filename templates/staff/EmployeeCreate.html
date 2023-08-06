@@ -80,6 +80,22 @@
                             <label for="lname">นามสกุล</label>
                         </div>
                     </div>
+                    <div class="col">
+                        <div class="form-floating mt-3">
+                            <input type="text" class="form-control" id="tel" placeholder="" v-model="phone">
+                            <label for="tel">โทรศัพท์</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mt-3">
+                            <select class="form-select" id="positions" v-model="position"
+                                aria-label="Floating label select example">
+                                <option selected value="">-</option>
+                                <option v-for="item in position_list" :value="item[0]">[{item[1]}]</option>
+                            </select>
+                            <label for="positions">ตำแหน่ง</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col">
@@ -88,31 +104,31 @@
                         <div class="form-floating mt-3">
                             <select class="form-select" id="provinces" v-model="province"
                                 aria-label="Floating label select example" @change="onProvinceChange()">
-                                <option selected value="">จังหวัด</option>
+                                <option selected value="">-</option>
                                 <option v-for="item in province_list" :value="item">[{item}]</option>
                             </select>
-                            <label for="provinces">เลือก</label>
+                            <label for="provinces">จังหวัด</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
                             <select class="form-select" id="districts" v-model="district" @change="onDistrictChange()"
                                 aria-label="Floating label select example">
-                                <option selected value="">อำเภอ</option>
+                                <option selected value="">-</option>
                                 <option v-for="item in district_list" :value="item">[{item}]</option>
                             </select>
-                            <label for="districts">เลือก</label>
+                            <label for="districts">อำเภอ</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
                             <div class="form-floating mt-3">
-                                <select class="form-select" id="sub_districts" v-model="sub_district" 
+                                <select class="form-select" id="sub_districts" v-model="sub_district"
                                     aria-label="Floating label select example">
-                                    <option selected value="">ตำบล</option>
+                                    <option selected value="">-</option>
                                     <option v-for="item in sub_district_list" :value="item">[{item}]</option>
                                 </select>
-                                <label for="sub_districts">เลือก</label>
+                                <label for="sub_districts">ตำบล</label>
                             </div>
                         </div>
                     </div>
@@ -126,12 +142,7 @@
                 </div>
                 <!--  -->
                 <div class="row row-cols-1 m-auto">
-                    <div class="col">
-                        <div class="form-floating mt-3">
-                            <input type="text" class="form-control" id="tel" placeholder="" v-model="phone">
-                            <label for="tel">โทรศัพท์</label>
-                        </div>
-                    </div>
+
                     <div class="col">
                         <div class="form-floating mt-3">
                             <textarea class="form-control" placeholder="Leave a comment here" id="addres"
@@ -163,6 +174,7 @@
 
                     fname: "",
                     lname: "",
+                    position: "",
                     province: "",
                     district: "",
                     sub_district: "",
@@ -173,6 +185,7 @@
                     province_list: null,
                     district_list: null,
                     sub_district_list: null,
+                    position_list: null,
 
                     email_isValid: true,
                     username_isValid: true,
@@ -186,6 +199,7 @@
                     address_isValid: true,
                     post_code_isValid: true,
                     phone_isValid: true,
+                    position_isValid:true,
 
                     isValid: true,
 
@@ -208,6 +222,18 @@
                 }
                 catch (err) {
                     console.log('load province fail!');
+                }
+
+                try {
+                    axios
+                        .get("{% url 'api-get-employee-position' %}")
+                        .then((response) => {
+                            this.position_list = response.data['data'];
+                        });
+
+                }
+                catch (err) {
+                    console.log('load position fail!');
                 }
             },
 
@@ -319,6 +345,12 @@
                         this.isValid = false;
                     }
 
+                    this.position_isValid = true
+                    if (this.position = ""){
+                        this.position_isValid = false;
+                        this.isValid = false
+                    }
+
                     if (this.isValid) {
 
                         const form_data = new FormData();
@@ -328,6 +360,7 @@
                         form_data.append('password', this.password);
                         form_data.append('fname', this.fname);
                         form_data.append('lname', this.lname);
+                        form_data.append('position', this.position);
                         form_data.append('province', this.province);
                         form_data.append('district', this.district);
                         form_data.append('sub_district', this.sub_district);

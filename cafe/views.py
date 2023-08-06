@@ -1,3 +1,4 @@
+from . import models
 from django.shortcuts import render
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
@@ -11,6 +12,7 @@ from rest_framework.response import Response
 import json
 
 # Create your views here.
+
 
 @csrf_exempt
 @api_view(["GET", ])
@@ -32,6 +34,7 @@ def getProvince(request):
             'data': data['province'],
         }
     )
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -56,7 +59,8 @@ def getDistrict(request):
         }
 
     )
-    
+
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
@@ -79,5 +83,69 @@ def getTambon(request):
             'status': True,
             'message': msg,
             'data': data['sub_district']
+        }
+    )
+
+
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes((AllowAny,))
+def getEmployeePosition(request):
+    position = models.EMP_POSITION
+
+    return Response({
+        "status": True,
+        "data": list(position)
+    })
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def EmployeeRegister(request):
+    email = request.data['email']
+    username = request.data['username']
+    password = request.data['password']
+    fname = request.data['fname']
+    lname = request.data['lname']
+    province = request.data['province']
+    district = request.data['district']
+    sub_district = request.data['sub_district']
+    address = request.data['address']
+    post_code = request.data['post_code']
+    phone = request.data['phone']
+    position = request.data['position']
+
+    status = True
+
+    try:
+        user = User.objects.create_user(
+            first_name=fname,
+            last_name=lname,
+            username=username,
+            email=email,
+            password=password,
+            is_staff=1
+        )
+        user.save()
+
+        models.Employee.objects.create(
+            user=user,
+            address=address,
+            sub_district=sub_district,
+            district=district,
+            province=province,
+            post_code=post_code,
+            phone=phone,
+            position=position
+        ).save()
+
+    except:
+        status = False
+        User.objects.get(username=username).delete()
+        
+    return Response(
+        {
+            "status":status
         }
     )
