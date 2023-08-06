@@ -5,6 +5,10 @@
   - [Project information](#project-information)
   - [Entity Relations Diagram (ERD) designed with BARD](#entity-relations-diagram-erd-designed-with-bard)
   - [Entity Relations Diagram (ERD) to Django models](#entity-relations-diagram-erd-to-django-models)
+- [Note](#note)
+  - [CSRF TOKEN](#csrf-token)
+
+
 
 ## Project information
 
@@ -18,6 +22,8 @@
 - Front-End
   - VueJs
   - Bootstrap 5
+
+[▲ back](#cafe-management)
 
 ## Entity Relations Diagram (ERD) designed with BARD
 
@@ -96,6 +102,8 @@ This ERD model shows the entities and relationships in a coffee shop full system
 - Table is related to Reservation.
 
 This ERD model is a high-level representation of the data in a coffee shop full system. It can be used to design the database for the system and to develop the software for the system.
+
+[▲ back](#cafe-management)
 
 ## Entity Relations Diagram (ERD) to Django models
 
@@ -250,3 +258,12 @@ class Reservation(models.Model):
         return self.table
 
 ```
+[▲ back](#cafe-management)
+
+# Note  
+
+## CSRF TOKEN
+```javascript
+form_data.append("csrfmiddlewaretoken", "{{csrf_token}}");
+```
+[▲ back](#cafe-management)
