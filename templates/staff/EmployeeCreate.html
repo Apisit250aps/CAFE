@@ -25,25 +25,25 @@
                 <div class="row row-cols-1 m-auto">
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="email" class="form-control" id="email" placeholder="">
+                            <input type="email" class="form-control" id="email" placeholder="" v-model="email" required>
                             <label for="email">Email</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" class="form-control" id="username" placeholder="">
+                            <input type="text" class="form-control" id="username" placeholder="" v-model="username">
                             <label for="username">Username</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="password" class="form-control" id="password" placeholder="">
+                            <input type="password" class="form-control" id="password" placeholder="" v-model="password">
                             <label for="password">Password</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="password" class="form-control" id="confirm" placeholder="">
+                            <input type="password" class="form-control" id="confirm" placeholder="" v-model="confirm">
                             <label for="confirm">Confirm Password</label>
                         </div>
                     </div>
@@ -70,13 +70,13 @@
                 <div class="row row-cols-1 row-cols-lg-2 m-auto">
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" class="form-control" id="fname" placeholder="">
+                            <input type="text" class="form-control" id="fname" placeholder="" v-model="fname">
                             <label for="fname">ชื่อ</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" class="form-control" id="lname" placeholder="">
+                            <input type="text" class="form-control" id="lname" placeholder="" v-model="lname">
                             <label for="lname">นามสกุล</label>
                         </div>
                     </div>
@@ -86,35 +86,39 @@
                 <div class="row row-cols-1 row-cols-lg-2 m-auto">
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" list="province-list" class="form-control" id="province" placeholder="">
-                            <label for="province">จังหวัด</label>
-                            <datalist id="province-list">
-                                <option value=""></option>
-                            </datalist>
+                            <select class="form-select" id="provinces" v-model="province"
+                                aria-label="Floating label select example" @change="onProvinceChange()">
+                                <option selected value="">จังหวัด</option>
+                                <option v-for="item in province_list" :value="item">[{item}]</option>
+                            </select>
+                            <label for="provinces">เลือก</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" list="district-list" class="form-control" id="district" placeholder="">
-                            <label for="district">อำเภอ</label>
-                            <datalist id="district-list">
-                                <option value=""></option>
-                            </datalist>
+                            <select class="form-select" id="districts" v-model="district" @change="onDistrictChange()"
+                                aria-label="Floating label select example">
+                                <option selected value="">อำเภอ</option>
+                                <option v-for="item in district_list" :value="item">[{item}]</option>
+                            </select>
+                            <label for="districts">เลือก</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" list="sub_district-list" class="form-control" id="sub_district"
-                                placeholder="">
-                            <label for="sub_district">ตำบล</label>
-                            <datalist id="sub_district-list">
-                                <option value=""></option>
-                            </datalist>
+                            <div class="form-floating mt-3">
+                                <select class="form-select" id="sub_districts" v-model="sub_district" 
+                                    aria-label="Floating label select example">
+                                    <option selected value="">ตำบล</option>
+                                    <option v-for="item in sub_district_list" :value="item">[{item}]</option>
+                                </select>
+                                <label for="sub_districts">เลือก</label>
+                            </div>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" class="form-control" id="post-code" placeholder="">
+                            <input type="text" class="form-control" id="post-code" placeholder="" v-model="post_code">
                             <label for="post-code">ไปรษณีย์</label>
 
                         </div>
@@ -124,13 +128,14 @@
                 <div class="row row-cols-1 m-auto">
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <input type="text" class="form-control" id="tel" placeholder="">
+                            <input type="text" class="form-control" id="tel" placeholder="" v-model="phone">
                             <label for="tel">โทรศัพท์</label>
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mt-3">
-                            <textarea class="form-control" placeholder="Leave a comment here" id="addres"></textarea>
+                            <textarea class="form-control" placeholder="Leave a comment here" id="addres"
+                                v-model="address"></textarea>
                             <label for="addres">รายละเอียดที่อยู่</label>
                         </div>
                     </div>
@@ -140,7 +145,7 @@
     </form>
 </main>
 {% endblock content %}
-
+<!--  -->
 {% block script %}
 <script type="module">
 
@@ -165,6 +170,10 @@
                     post_code: "",
                     phone: "",
 
+                    province_list: null,
+                    district_list: null,
+                    sub_district_list: null,
+
                     email_isValid: true,
                     username_isValid: true,
                     password_isValid: true,
@@ -186,11 +195,62 @@
                 };
             },
             mounted() {
+                try {
+                    axios
+                        .get("{% url 'api-get-province' %}")
+                        .then((response) => {
+                            if (response.data['status']) {
+                                this.province_list = response.data['data'];
+                                console.log('province load successfully!');
+                            }
+                        });
 
+                }
+                catch (err) {
+                    console.log('load province fail!');
+                }
             },
 
 
             methods: {
+                onProvinceChange() {
+
+                    const form_data = new FormData();
+                    form_data.append("csrfmiddlewaretoken", "{{csrf_token}}");
+                    form_data.append('province', this.province);
+                    axios
+                        .post("{% url 'api-get-district' %}", form_data)
+                        .then((response) => {
+                            if (response.data['status']) {
+                                this.district_list = response.data['data'];
+                            }
+                            console.log(`load district in ${this.province} successfully!`);
+                            this.sub_district_list = new Array();
+                            this.district = "";
+                            this.sub_district = "";
+                        })
+                        .catch((err) => {
+                            console.log(`load district in ${this.province} fail!`);
+                        });
+                },
+                onDistrictChange() {
+                    const form_data = new FormData();
+                    form_data.append("csrfmiddlewaretoken", "{{csrf_token}}");
+                    form_data.append('province', this.province);
+                    form_data.append('district', this.district);
+
+                    axios
+                        .post("{% url 'api-get-sub-district' %}", form_data)
+                        .then((response) => {
+                            if (response.data['status']) {
+                                this.sub_district_list = response.data['data'];
+                                this.sub_district = "";
+                            }
+                        });
+
+
+
+                },
                 onSubmit(e) {
                     e.preventDefault();
 
@@ -278,15 +338,14 @@
                         axios
                             .post(form_data)
                             .then((response) => {
-                                if (response.data['status']){
-                                    
+                                if (response.data['status']) {
+
                                 }
 
                             })
                             .catch((err) => {
-                                
-                            });
 
+                            });
                     }
 
                 }
