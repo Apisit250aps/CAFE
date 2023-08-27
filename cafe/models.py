@@ -64,7 +64,7 @@ class Employee(models.Model):
     sub_district = models.CharField(max_length=256)
     district = models.CharField(max_length=256)
     province = models.CharField(max_length=256)
-    post_code = models.IntegerField(max_length=5)
+    post_code = models.CharField(max_length=5)
 
     # contacts
     phone = models.CharField(max_length=10)
@@ -80,7 +80,6 @@ class Product(models.Model):
     name = models.CharField(max_length=256)
     desc = models.TextField()
     price = models.DecimalField(max_digits=7, decimal_places=2)
-
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     stock_level = models.IntegerField()
 
@@ -154,3 +153,35 @@ class Reservation(models.Model):
 
     def __str__(self):
         return self.table
+
+# Image Models
+
+class ProductsImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='product_image')
+    
+    def __str__(self):
+        return f"{self.product}"
+    
+class CategoryImage(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='category_image')
+    
+    def __str__(self):
+        return f"{self.category}"
+    
+class EmployeeImage(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='employee_image')
+    
+    def __str__(self):
+        return f"{self.employee}"
+    
+class CustomerImage(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='customer_image')
+
+    def __str__(self):
+        return self.customer
+
+    

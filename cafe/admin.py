@@ -24,3 +24,16 @@ class ProductAdmin(admin.ModelAdmin):
         'stock_level',
     )
 
+@admin.register(models.ProductsImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = [
+        'product',
+        'image'
+    ]
+    
+@admin.register(models.CategoryImage)
+class CategoryImageAdmin(admin.ModelAdmin):
+    list_display = [
+        'category',
+        'image'
+    ]
