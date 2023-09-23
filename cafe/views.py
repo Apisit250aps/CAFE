@@ -1,9 +1,15 @@
 from . import models
+from . import serializers
+from . import map
+
+
 from django.shortcuts import render
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.staticfiles import finders
+from django.contrib.auth import login, logout, authenticate
+
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,7 +17,10 @@ from rest_framework.response import Response
 
 import json
 
+
 # Create your views here.
+
+# Data for register
 
 
 @csrf_exempt
@@ -57,7 +66,6 @@ def getDistrict(request):
             'message': msg,
             'data': data['district'],
         }
-
     )
 
 
@@ -99,53 +107,118 @@ def getEmployeePosition(request):
     })
 
 
+# Authentications
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
-def EmployeeRegister(request):
+def register(request):
+    status = True
+    message = ""
     email = request.data['email']
     username = request.data['username']
     password = request.data['password']
-    fname = request.data['fname']
-    lname = request.data['lname']
-    province = request.data['province']
-    district = request.data['district']
-    sub_district = request.data['sub_district']
-    address = request.data['address']
-    post_code = request.data['post_code']
-    phone = request.data['phone']
-    position = request.data['position']
 
-    status = True
-
-    try:
+    no_Exist = (
+        (User.objects.filter(username=username).count() == 0)
+        and
+        (User.objects.filter(email=email).count() == 0)
+    )
+    if no_Exist:
         user = User.objects.create_user(
-            first_name=fname,
-            last_name=lname,
-            username=username,
             email=email,
-            password=password,
-            is_staff=1
+            username=username,
+            password=password
         )
-        user.save()
-
-        models.Employee.objects.create(
-            user=user,
-            address=address,
-            sub_district=sub_district,
-            district=district,
-            province=province,
-            post_code=post_code,
-            phone=phone,
-            position=position
-        ).save()
-
-    except:
+        if user:
+            auth = authenticate(
+                username=username,
+                password=password
+            )
+            login(request, auth)
+            status = True
+            message = "Success"
+    else:
         status = False
-        User.objects.get(username=username).delete()
-        
+        message = "Username or Email is exist!"
+
     return Response(
         {
-            "status":status
+            "status": status,
+            "message": message
+        }
+    )
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def createCustomer(request):
+    status = True
+    message = ""
+    
+    user = User.objects.get(username=request.user.username)
+    
+    fname = request.data['fname']
+    lname = request.data['lname']
+    
+    address = request.data['address']
+    sub_district = request.data['sub_district']
+    district = request.data['district']
+    province = request.data['province']
+    post_code = request.data['post_code']
+    phone = request.data['phone']
+    
+    User.objects.filter(id=user.id).update(first_name=fname, last_name=lname)
+    
+    customer = models.Customer.objects.create(
+        user=user,
+        address=address,
+        sub_district=sub_district,
+        district=district,
+        province=province,
+        post_code=post_code,
+        phone=phone,
+    )
+    
+    if customer:
+        status = True
+        message = "Success"
+    else :
+        status = False
+        message = "Fail"
+    return Response(
+        {
+            "status":status,
+            "message":message
+        }
+    )
+    
+
+
+
+
+
+# Order
+
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes((AllowAny,))
+def showOrderAll(request):
+    order = models.Order.objects.all().order_by()
+    orderSerializer = serializers.OrderSerializer(order, many=True).data
+    data = []
+    for item in orderSerializer:
+        item = dict(item)
+        item['customer'] = map.Customer(item['customer'])
+        item['employee'] = map.Employee(item['employee'])
+        item['product'] = map.Product(item['product'])
+        item['order_status'] = map.Choice(id=item['order_status'], choices=models.ORDER_STATUS)
+        data.append(item)
+    
+    return Response(
+        {
+            "status":True,
+            "data":data
         }
     )
