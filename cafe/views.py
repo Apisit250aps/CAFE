@@ -156,21 +156,21 @@ def register(request):
 def createCustomer(request):
     status = True
     message = ""
-    
+
     user = User.objects.get(username=request.user.username)
-    
+
     fname = request.data['fname']
     lname = request.data['lname']
-    
+
     address = request.data['address']
     sub_district = request.data['sub_district']
     district = request.data['district']
     province = request.data['province']
     post_code = request.data['post_code']
     phone = request.data['phone']
-    
+
     User.objects.filter(id=user.id).update(first_name=fname, last_name=lname)
-    
+
     customer = models.Customer.objects.create(
         user=user,
         address=address,
@@ -180,32 +180,31 @@ def createCustomer(request):
         post_code=post_code,
         phone=phone,
     )
-    
+
     if customer:
         status = True
         message = "Success"
-    else :
+    else:
         status = False
         message = "Fail"
     return Response(
         {
-            "status":status,
-            "message":message
+            "status": status,
+            "message": message
         }
     )
-    
 
 
 
 
-
+# ========================================================================
 # Order
 
 @csrf_exempt
 @api_view(["GET"])
 @permission_classes((AllowAny,))
 def showOrderAll(request):
-    order = models.Order.objects.all().order_by()
+    order = models.Order.objects.all().order_by('order_status')
     orderSerializer = serializers.OrderSerializer(order, many=True).data
     data = []
     for item in orderSerializer:
@@ -213,12 +212,134 @@ def showOrderAll(request):
         item['customer'] = map.Customer(item['customer'])
         item['employee'] = map.Employee(item['employee'])
         item['product'] = map.Product(item['product'])
-        item['order_status'] = map.Choice(id=item['order_status'], choices=models.ORDER_STATUS)
+        item['order_status'] = map.Choice(
+            id=item['order_status'], choices=models.ORDER_STATUS)
         data.append(item)
-    
+
     return Response(
         {
-            "status":True,
-            "data":data
+            "status": True,
+            "data": data
+        }
+    )
+
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes((AllowAny,))
+def showOrderStatus(request, id:int):
+    order = models.Order.objects.filter(order_status=id).order_by('id')
+    orderSerializer = serializers.OrderSerializer(order, many=True).data
+    data = []
+    for item in orderSerializer:
+        item = dict(item)
+        item['customer'] = map.Customer(item['customer'])
+        item['employee'] = map.Employee(item['employee'])
+        item['product'] = map.Product(item['product'])
+        item['order_status'] = map.Choice(
+            id=item['order_status'], choices=models.ORDER_STATUS)
+        data.append(item)
+
+    return Response(
+        {
+            "status": True,
+            "data": data
+        }
+    )
+
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def sentOrder(request):
+    user = User.objects.get(username=request.user.username)
+    customer = models.Customer.objects.get(user=user)
+    product_object = json.loads(request.data['product_object'])
+
+    for products in product_object.values():
+        product = models.Product.objects.get(id=int(products['product_id']))
+        quantity = int(products['quantity'])
+        price = float(products['price'])
+        try:
+            
+            models.Order.objects.create(
+                customer=customer,
+                product=product,
+                quantity=quantity,
+                price=price,
+                order_status=1
+            )
+            status = True
+            
+        except Exception as err:
+            status = False
+            print(err)
+
+    return Response(
+        {
+            "status": status
+        }
+    )
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def acceptOrder(request):
+    user = User.objects.get(username=request.user.username)
+    employee = models.Employee.objects.get(user=user)
+    try :
+        models.Order.objects.filter(id=request.data['order_id']).update(
+            employee=employee,
+            order_status=2
+        )
+        status = True
+    except Exception as err:
+        status = False
+        print(err)
+        
+    return Response(
+        {
+            "status":status
+        }
+    )
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def orderSuccess(request):
+    id = request.data['order_id']
+    try :
+        models.Order.objects.filter(id=id).update(
+            order_status=3
+        )
+        status = True
+    except Exception as err:
+        status = False
+        print(err)
+        
+    return Response(
+        {
+            "status":status
+        }
+    )
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def cancelOrder(request):
+    id = request.data['order_id']
+    try :
+        models.Order.objects.filter(id=id).update(
+            order_status=4
+        )
+        status = True
+    except Exception as err:
+        status = False
+        print(err)
+        
+    return Response(
+        {
+            "status":status
         }
     )

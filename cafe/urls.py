@@ -13,5 +13,14 @@ urlpatterns = [
     # authentications 
     path('auth/register/', api.register, name='register-api'),
     
-        
+    
+    # Order
+    path('order/all', api.showOrderAll, name='api-all-order'),
+    path('order/<int:id>', api.showOrderStatus, name='api-status-order'),
+    path('order/create', api.sentOrder, name='api-sent-order'),
+    path('order/accept', api.acceptOrder, name='api-accept-order'),
+    path('order/success', api.orderSuccess, name='api-success-order'),
+    path('order/cancel', api.cancelOrder, name='api-cancel-order'),
+    
+
 ]
