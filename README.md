@@ -104,7 +104,7 @@ This ERD model is a high-level representation of the data in a coffee shop full 
 * [ ] สร้าง API
   * [X] API การลงทะเบียนลูกค้า
   * [X] API การลงทะเบียนพนักงาน
-  * [ ] API แสดงสินค้าทั้งหมด
+  * [X] API แสดงสินค้าทั้งหมด
   * [X] API แสดงคำสั่งซื้อ
   * [ ] API เพิ่มสินค้าในตะกร้า
   * [ ] API แสดงสินค้าในตะกร้า

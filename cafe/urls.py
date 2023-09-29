@@ -22,5 +22,8 @@ urlpatterns = [
     path('order/success', api.orderSuccess, name='api-success-order'),
     path('order/cancel', api.cancelOrder, name='api-cancel-order'),
     
-
+    # Product
+    path('product/all', api.showProductAll, name='api-all-product')
+    
+    # cart 
 ]

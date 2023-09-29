@@ -343,3 +343,36 @@ def cancelOrder(request):
             "status":status
         }
     )
+    
+
+# Products 
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes((AllowAny,))
+def showProductAll():
+    status = True
+    query = models.Product.objects.all()
+    data = serializers.ProductSerializer(query, many=True).data
+    
+    return Response(
+        {
+            "status":True,
+            "data":data
+        }
+    )
+
+
+# Cart API
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes((AllowAny,))
+def showUserCart(request):
+    user = User.objects.get(username=request.user.username)
+    customer = models.Customer.objects.get(user=user)
+    
+    
+    return Response(
+        {
+            "status":True
+        }
+    )
