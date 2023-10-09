@@ -12,7 +12,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
-        fields = all
+        fields = "__all__"
         
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:

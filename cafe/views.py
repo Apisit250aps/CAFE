@@ -349,11 +349,11 @@ def cancelOrder(request):
 @csrf_exempt
 @api_view(["GET"])
 @permission_classes((AllowAny,))
-def showProductAll():
+def showProductAll(request):
     status = True
     query = models.Product.objects.all()
     data = serializers.ProductSerializer(query, many=True).data
-    
+
     return Response(
         {
             "status":True,
