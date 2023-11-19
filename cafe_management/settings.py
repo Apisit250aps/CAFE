@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'cafe_management.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "cafedb",
+        "NAME": "cafe_db",
         "USER": "postgres",
         "PASSWORD": "apisit250",
         "HOST": "127.0.0.1",
