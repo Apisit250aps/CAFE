@@ -14,6 +14,8 @@ EMP_POSITION = (
 
 )
 
+
+
 ORDER_STATUS = (
     (1, "waiting"),
     (2, "ordered"),
@@ -22,173 +24,54 @@ ORDER_STATUS = (
 
 )
 
-PAYMENT = (
-    (1, "credit card"),
-    (2, "cash"),
-    (3, "coupon"),
-)
-
-class Category(models.Model):
-    
-    category = models.CharField(max_length=128)
-
-    def __str__(self):
-        return self.category
 
 
 class Customer(models.Model):
-    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    # address
-    address = models.TextField(default="-", blank=True)
-    sub_district = models.CharField(max_length=256, blank=True)
-    district = models.CharField(max_length=256, blank=True)
-    province = models.CharField(max_length=256, blank=True)
-    post_code = models.CharField(max_length=5)
+    tel = models.CharField(max_length=10)
+    point = models.IntegerField()
     
-    # contacts
-    phone = models.CharField(max_length=10, blank=True)
-    # points
-    loyalty = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.user.username
-
-
 class Employee(models.Model):
-    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    address = models.TextField(default="-", blank=True)
-    sub_district = models.CharField(max_length=256)
-    district = models.CharField(max_length=256)
-    province = models.CharField(max_length=256)
-    post_code = models.CharField(max_length=5)
-
-    # contacts
-    phone = models.CharField(max_length=10)
-    # points
     position = models.IntegerField(choices=EMP_POSITION)
+    point = models.IntegerField()
+    tel = models.CharField(max_length=10)
+    address = models.TextField()
 
-    def __str__(self):
-        return self.user.username+" : "+self.position
 
-
-class Product(models.Model):
+class Category(models.Model):
+    category = models.CharField(max_length=255)
     
-    name = models.CharField(max_length=256)
-    desc = models.TextField()
-    price = models.DecimalField(max_digits=7, decimal_places=2)
+class Menu(models.Model):
+    name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    stock_level = models.IntegerField()
+    desc = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=9, decimal_places=2)
+    status = models.BooleanField(default=1)
+    
 
-    def __str__(self):
-        return self.name
-
-class Cart(models.Model):
+class Favorite(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
     
-    def __str__(self):
-        return self.customer+" "+self.product
-
-class Order(models.Model):
+class Zone(models.Model):
+    name = models.CharField(max_length=8)
     
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=7, decimal_places=2)
-
-    order_status = models.IntegerField(choices=ORDER_STATUS)
-    order_date = models.DateTimeField(auto_now_add=True)
-    order_finish = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-
-        return self.product+" : "+self.order_status
-
-
-class Payment(models.Model):
-    
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    payment_method = models.IntegerField(choices=PAYMENT)
-    amount = models.DecimalField(max_digits=3, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.order} {self.amount}"
-
-
-class Ingredient(models.Model):
-
-    name = models.CharField(max_length=256)
-    desc = models.TextField()
-    cost = models.DecimalField(max_digits=7, decimal_places=2)
-
-    def __str__(self):
-        return self.name
-
-
-class Recipe(models.Model):
-    
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-
-    def __str__(self):
-        return self.product
-
-
 class Table(models.Model):
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    status = models.BooleanField(default=0)
     
-    name = models.CharField(max_length=128)
-    capacity = models.IntegerField()
-
-    def __str__(self):
-        return self.name
-
-
-class Reservation(models.Model):
-    
+class Order(models.Model):
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-
-    start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.table
-
-# Image Models
-
-class ProductsImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='product_image')
-    
-    def __str__(self):
-        return f"{self.product}"
-    
-class CategoryImage(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='category_image')
-    
-    def __str__(self):
-        return f"{self.category}"
-    
-class EmployeeImage(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='employee_image')
-    
-    def __str__(self):
-        return f"{self.employee}"
-    
-class CustomerImage(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='customer_image')
-
-    def __str__(self):
-        return self.customer
-
+    code = models.CharField(max_length=8)
+    date = models.DateTimeField(auto_created=True)
+    status = models.IntegerField(choices=ORDER_STATUS)
     
+    
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=9, decimal_places=2)
